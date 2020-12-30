@@ -3,7 +3,6 @@ import smtplib
 import email
 from email.message import EmailMessage
 from email import policy #useful when returning UTF-8 text
-import os
 
 class EmailNotFound(Exception):
     pass

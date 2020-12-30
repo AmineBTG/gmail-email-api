@@ -5,12 +5,6 @@ from email.message import EmailMessage
 from email import policy #useful when returning UTF-8 text
 import os
 
-try:
-    from gmail_credentials import NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD
-except ImportError:
-    NAT_GMAIL_ADDRESS = os.environ.get("NAT_GMAIL_ADDRESS") 
-    NAT_GMAIL_PASSWORD = os.environ.get("NAT_GMAIL_PASSWORD")
-
 class EmailNotFound(Exception):
     pass
 
@@ -156,12 +150,17 @@ class GmailEmail(object):
             print(f"Instantiating class GmailEmail(gmail_connection, email_UID = {results[0]})", "\n")
             return cls(gmail_connection, results[0])
 
+    @staticmethod
+    def send_mail(sender_name, recipient_email, subject, body_content, user_name, password):
+        msg = EmailMessage()
+        msg["From"] = sender_name
+        msg["To"] = recipient_email
 
+        msg["Subject"] = subject
+        msg.set_content(body_content)
 
-if __name__ == "__main__":
-    con = GmailConnection(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD).get_connection()
-    # email_object = GmailEmail(con, "17")
-    email_object = GmailEmail.from_search_result(con, "décret", unseen=None)
-    print(email_object.info)
-    print(email_object.attachment_name_all)
-    # email_object.mark_as_unseen()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(user_name, password)
+            smtp.send_message(msg)
+
+        print(f"E-mail sent !")

@@ -36,11 +36,10 @@ class GmailEmail(object):
     GMAIL_EMAIL_ENCODING = "(RFC822)"
 
     def __init__(self, gmail_connection:imaplib.IMAP4_SSL, email_UID:str):
-        # self.user_name = user_name
-        self.email_UID = str(email_UID)
+        self.email_UID = email_UID
         self.con = gmail_connection
         self.con.select("INBOX")
-        pprint("Available emails UIDs in 'INBOX' folder:", self.con.uid("SEARCH", None, "ALL")[1], "\n")
+        print("Available emails UIDs in 'INBOX' folder:", self.con.uid("SEARCH", None, "ALL")[1], "\n")
 
         self.info, self.attachment_data_all, self._msg = self._fetch_email_data()
         if not self.info: raise EmailNotFound(f"Email UID {self.email_UID} CANNOT BE FOUND - Does this mail even exist ?")
@@ -48,7 +47,7 @@ class GmailEmail(object):
         self.attachment_name = None if not self.info else self.info["AttachmentName"][0] if isinstance(self.info["AttachmentName"], list) else None
         self.attachment_name_all = None if not self.info else self.info["AttachmentName"] 
 
-        pprint(self.info, indent=3)
+        pprint(self.info)
 
     def _fetch_email_data(self):
         """
@@ -70,6 +69,7 @@ class GmailEmail(object):
             return msg_info, None if not msg_attachments_data else msg_attachments_data, msg
         
         except Exception as e:
+            print(f"Error happended when fetching email UID {self.email_UID}", e)
             return None, None, None
 
     def mark_as_unseen(self):

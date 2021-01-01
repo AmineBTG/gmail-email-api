@@ -3,7 +3,7 @@ import smtplib
 import email
 from email.message import EmailMessage
 from email import policy #useful when returning UTF-8 text
-from typing import Literal
+from typing import Literal  #does not work with Python 3.7
 from pprint import pprint
 
 class EmailNotFound(Exception): pass
@@ -30,10 +30,10 @@ class GmailConnection(object):
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exit_type, value, traceback):
         self.connection.close()
-        print("\n")
-        print("*** Gmail Connection closed ! ***")
+        print("")
+        pprint("*** Gmail Connection closed ! ***")
 
 class GmailEmail(object):
     """
@@ -243,7 +243,16 @@ class GmailEmail(object):
 
 
 if __name__ == "__main__":
-    with GmailConnection("revenue.api@gmail.com", "Amine1988+") as gmail:
-        con = gmail.get_connection()
-        em = GmailEmail.from_search_result(con, subject="history and forecast", unseen=None)
-        pprint(em.attachment_name)
+    try:
+
+        from gmail_credentials import NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD
+
+        # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
+        with GmailConnection(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD) as gmail:
+            connection = gmail.get_connection()
+            email_object = GmailEmail.from_search_result(connection, subject="décret", unseen=None)
+
+        pprint(email_object.attachment_name)
+
+    except:
+        pass

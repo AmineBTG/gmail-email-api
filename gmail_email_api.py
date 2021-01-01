@@ -3,12 +3,11 @@ import smtplib
 import email
 from email.message import EmailMessage
 from email import policy #useful when returning UTF-8 text
+from typing import Literal
 
-class EmailNotFound(Exception):
-    pass
+class EmailNotFound(Exception): pass
 
-class NoSearchResultsFound(Exception):
-    pass
+class NoSearchResultsFound(Exception): pass
 
 class GmailConnection(object):
     """
@@ -35,9 +34,12 @@ class GmailEmail(object):
     """
     GMAIL_EMAIL_ENCODING = "(RFC822)"
 
+    class EmailNotFound(Exception): pass
+    class NoSearchResultsFound(Exception): pass
+
     def __init__(self, gmail_connection:imaplib.IMAP4_SSL, email_UID:str):
         # self.user_name = user_name
-        self.email_UID = email_UID
+        self.email_UID = str(email_UID)
         self.con = gmail_connection
         self.con.select("INBOX")
         print("Available emails UIDs in 'INBOX' folder:", self.con.uid("SEARCH", None, "ALL")[1], "\n")
@@ -83,6 +85,30 @@ class GmailEmail(object):
         """
         print(self.con.uid("STORE", self.email_UID, "+FLAGS", "\\Deleted"))
 
+    @classmethod
+    def from_search_result(cls, gmail_connection:imaplib.IMAP4_SSL, unseen:Literal[True, False, None] = True, **search_agrs):
+        """
+        gmail_connection: an imaplib.IMAP4_SSL connection object "use GmailConnection class and .get_connection() methode to get it.
+        
+        **search_agrs a series of search_field:search_expressions values such as From = 'Amine B', senton = '07-DEC-2020', subject = 'blablabla'
+        searchfileds can be : [subject, body ,to, From(not from -> Python keyword), senton, sentsince, sentbefore]
+        search_expression: string value of the expression that will be searched 
+        
+        
+        
+        unseen: can take TRUE, FALSE or NONE | Default set to TRUE
+        - if True: will search for UNSEEN / UNREAD emails only
+        - if False: will search for SEEN / READ emails only
+        - if None: will search for regardless if SEEN/READ or not.
+        returns the first email UID found from the search
+        """
+        if len(search_agrs) == 1: result = GmailEmail._search_email(gmail_connection, unseen = unseen, **search_agrs)
+        if len(search_agrs) > 1:  result = GmailEmail._search_email_multi_criteria(gmail_connection, unseen = unseen, **search_agrs)
+        if not search_agrs: raise NoSearchResultsFound("No search arguments passed. Try passing arguments such as subject='Hello', From='Amine' etc..")
+
+        print(f"Instantiating class instance -> GmailEmail(gmail_connection, email_UID = {result})", "\n")
+        return cls(gmail_connection, result)
+
     @staticmethod
     def _get_email_body(msg: email.message.EmailMessage):
         """
@@ -116,11 +142,13 @@ class GmailEmail(object):
 
         return attachments_name, attachments_bytes
 
-    @classmethod
-    def from_search_result(cls, gmail_connection:imaplib.IMAP4_SSL, search_expression:str, search_field:str = "SUBJECT", unseen = True):
+    @staticmethod
+    def _search_email(gmail_connection:imaplib.IMAP4_SSL, unseen:Literal[True, False, None] = True, **search_agrs):
         """
-        user_name: str, Gmail email account user name
-        password: str, Gmail email account  password
+        ** SUPPORT UTF-8 encoding search text. **
+        Search for emails with **single key/value search argument** ex: subject = "blablabla"
+        ----
+        gmail_connection: an imaplib.IMAP4_SSL connection object "use GmailConnection class and .get_connection() methode to get it.
         search_expression: str, the expression that will be searched 
         search_field: str, the field where the above expression will be searched, default : 'SUBJECT', can also be 'FROM', 'SENTON','SENTSINCE', 'SENTBEFORE', etc.. 
         unseen: can take TRUE, FALSE or NONE | Default set to TRUE
@@ -129,6 +157,12 @@ class GmailEmail(object):
         - if None: will search for regardless if SEEN/READ or not.
         returns the first email UID found from the search
         """
+        # transform **search_args to string
+        search_field = list(search_agrs.keys())[0].upper()
+        search_expression = list(search_agrs.values())[0]
+
+        if search_field in ["SENTON", "SENTSINCE", "SENTBEFORE"]: return GmailEmail._search_email_multi_criteria(gmail_connection, unseen = unseen, **search_agrs)
+
         gmail_connection.select("INBOX")
         search_expression = f'"{search_expression}"'
         gmail_connection.literal = search_expression.encode("utf-8") # to work around encoding problems
@@ -145,10 +179,45 @@ class GmailEmail(object):
         if results: 
             results = results[0].split()  #split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]
             if len(results) > 1: print(f"**** BE CAREFULL, MORE THAN ONE RESULT ({len(results)}) WERE FOUND ! ****") 
-            if len(results) > 1: print(f"**** RESULTS FOUND: {results}. EMAIL UID RETURNED: {results[0]}") 
-            print(f"Instantiating class GmailEmail(gmail_connection, email_UID = {results[0]})", "\n")
-            return cls(gmail_connection, results[0])
+            if len(results) > 1: print(f"**** RESULTS FOUND: {results}. EMAIL UID RETURNED: {results[0]} ****", "\n")
+            return results[0]
 
+    @staticmethod
+    def _search_email_multi_criteria(gmail_connection:imaplib.IMAP4_SSL, unseen:Literal[True, False, None] = True, **search_agrs):
+        """
+        **DO NOT SUPPORT UTF-8 encoding search text.*
+        ---
+        search for emails with **multiple key/value search arguments** ex: subject = "blablabla", from = "Eric Dupont", senton = "07-DEC-2020", etc...
+        ----
+        gmail_connection: an imaplib.IMAP4_SSL connection object "use GmailConnection class and .get_connection() methode to get it.
+        search_expression: str, the expression that will be searched 
+        search_field: str, the field where the above expression will be searched, default : 'SUBJECT', can also be 'FROM', 'SENTON','SENTSINCE', 'SENTBEFORE', etc.. 
+        unseen: can take TRUE, FALSE or NONE | Default set to TRUE
+        - if True: will search for UNSEEN / UNREAD emails only
+        - if False: will search for SEEN / READ emails only
+        - if None: will search for regardless if SEEN/READ or not.
+        returns the first email UID found from the search
+        """
+
+        # transform **search_args to list / generator which can be unpacked later on UID method
+        search_agrs = {k.upper():f'"{v}"' for k,v in search_agrs.items()}  #transform keys to upper case and "" to the values
+        search_agrs =[item for items in search_agrs.items() for item in items] #transform dict to list {k1:v1, k2:v2} -> (k1, v1, k2, v2)
+
+        gmail_connection.select("INBOX")
+
+        if unseen == True: results = gmail_connection.uid('SEARCH', 'CHARSET', 'UTF-8', "UNSEEN", *search_agrs)[1]
+        if unseen == False: results = gmail_connection.uid('SEARCH', 'CHARSET', 'UTF-8', "SEEN", *search_agrs)[1]        
+        if unseen == None: results = gmail_connection.uid('SEARCH', 'CHARSET', 'UTF-8', *search_agrs)[1]
+
+        if not results or results == [b'']:
+            raise NoSearchResultsFound(f"No results found for search expressions: '{search_agrs[1::2]}', in field: '{search_agrs[::2]}', unseen: '{unseen}'")
+
+        if results: 
+            results = results[0].split()  #split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]
+            if len(results) > 1: print(f"**** BE CAREFULL, MORE THAN ONE RESULT ({len(results)}) WERE FOUND ! ****") 
+            if len(results) > 1: print(f"**** RESULTS FOUND: {results}. EMAIL UID RETURNED: {results[0]} ****", "\n") 
+            return results[0]
+    
     @staticmethod
     def send_mail(sender_name, recipient_email, subject, body_content, user_name, password):
         msg = EmailMessage()
@@ -163,3 +232,11 @@ class GmailEmail(object):
             smtp.send_message(msg)
 
         print(f"E-mail sent !")
+
+if __name__ == "__main__":
+    from pprint import pprint
+    con = GmailConnection("revenue.api@gmail.com", "Amine1988+").get_connection()
+    em = GmailEmail(con, 114)
+    pprint(em.info)
+    pass
+    

@@ -34,9 +34,6 @@ class GmailEmail(object):
     """
     GMAIL_EMAIL_ENCODING = "(RFC822)"
 
-    class EmailNotFound(Exception): pass
-    class NoSearchResultsFound(Exception): pass
-
     def __init__(self, gmail_connection:imaplib.IMAP4_SSL, email_UID:str):
         # self.user_name = user_name
         self.email_UID = str(email_UID)
@@ -236,7 +233,7 @@ class GmailEmail(object):
 if __name__ == "__main__":
     from pprint import pprint
     con = GmailConnection("revenue.api@gmail.com", "Amine1988+").get_connection()
-    em = GmailEmail(con, 114)
+    em = GmailEmail(con, 125)
     pprint(em.info)
     pass
     

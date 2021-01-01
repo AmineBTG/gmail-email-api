@@ -4,6 +4,7 @@ import email
 from email.message import EmailMessage
 from email import policy #useful when returning UTF-8 text
 from typing import Literal
+from pprint import pprint
 
 class EmailNotFound(Exception): pass
 
@@ -39,13 +40,15 @@ class GmailEmail(object):
         self.email_UID = str(email_UID)
         self.con = gmail_connection
         self.con.select("INBOX")
-        print("Available emails UIDs in 'INBOX' folder:", self.con.uid("SEARCH", None, "ALL")[1], "\n")
+        pprint("Available emails UIDs in 'INBOX' folder:", self.con.uid("SEARCH", None, "ALL")[1], "\n")
 
         self.info, self.attachment_data_all, self._msg = self._fetch_email_data()
         if not self.info: raise EmailNotFound(f"Email UID {self.email_UID} CANNOT BE FOUND - Does this mail even exist ?")
         self.attachment_data = None if not self.attachment_data_all else self.attachment_data_all[0] if isinstance(self.attachment_data_all, list) else None
         self.attachment_name = None if not self.info else self.info["AttachmentName"][0] if isinstance(self.info["AttachmentName"], list) else None
         self.attachment_name_all = None if not self.info else self.info["AttachmentName"] 
+
+        pprint(self.info, indent=3)
 
     def _fetch_email_data(self):
         """
@@ -229,11 +232,3 @@ class GmailEmail(object):
             smtp.send_message(msg)
 
         print(f"E-mail sent !")
-
-if __name__ == "__main__":
-    from pprint import pprint
-    con = GmailConnection("revenue.api@gmail.com", "Amine1988+").get_connection()
-    em = GmailEmail(con, 125)
-    pprint(em.info)
-    pass
-    

@@ -27,6 +27,14 @@ class GmailConnection(object):
     def __repr__(self):
         return f'GmailConnection(user_name= "{self.user_name}", password= "***********")'
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.connection.close()
+        print("\n")
+        print("*** Gmail Connection closed ! ***")
+
 class GmailEmail(object):
     """
     Gmail Single Email Class
@@ -232,3 +240,10 @@ class GmailEmail(object):
             smtp.send_message(msg)
 
         print(f"E-mail sent !")
+
+
+if __name__ == "__main__":
+    with GmailConnection("revenue.api@gmail.com", "Amine1988+") as gmail:
+        con = gmail.get_connection()
+        em = GmailEmail.from_search_result(con, subject="history and forecast", unseen=None)
+        pprint(em.attachment_name)

@@ -38,8 +38,6 @@ class GmailConnection(object):
 
     def __exit__(self, exit_type, value, traceback):
         self.connection.close()
-        print("")
-        pprint("*** Gmail Connection closed ! ***")
 
 class GmailEmail(object):
     """
@@ -285,6 +283,5 @@ if __name__ == "__main__":
         connection = gmail.get_connection()
         email_object = GmailEmail.from_search_result(connection, subject="décret", unseen=None)
     
-
-    GmailEmail.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Naturalisation API", "boutaghouamine@gmail.com", 
+    email_object.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Naturalisation API", "boutaghouamine@gmail.com", 
                         "hello", "Hello Amine", file_name="décret.pdf", file_data=email_object.attachment_data, file_sub_type="pdf")

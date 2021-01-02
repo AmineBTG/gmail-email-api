@@ -64,5 +64,8 @@ Best practice and get started :
             connection = gmail.get_connection()
             email_object = GmailEmail.from_search_result(connection, subject="Hello from amine", unseen=None)
 
-        pprint(email_object.attachment_name)
+        # send email the an attachment file
+        email_object.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Web API", "boutaghouamine@gmail.com", 
+                "hello", "Hello Amine", file_name="file.pdf", file_data=email_object.attachment_data, file_main_type="application", file_sub_type="pdf")
+        
 *********************************************************************************************************************************

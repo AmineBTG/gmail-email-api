@@ -271,17 +271,3 @@ class GmailEmail(object):
 
     def __repr__(self):
         return f"GmailEmail('gmail_connection', email_UID = '{self.email_UID}')"
-
-
-if __name__ == "__main__":
-
-    #for testing / debugging purposes
-    from gmail_credentials import NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD
-
-    # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
-    with GmailConnection(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD) as gmail:
-        connection = gmail.get_connection()
-        email_object = GmailEmail.from_search_result(connection, subject="décret", unseen=None)
-    
-    email_object.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Naturalisation API", "boutaghouamine@gmail.com", 
-                        "hello", "Hello Amine", file_name="décret.pdf", file_data=email_object.attachment_data, file_sub_type="pdf")

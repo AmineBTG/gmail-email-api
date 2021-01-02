@@ -1,3 +1,9 @@
+# Author: Amine BOUTAGHOU   / boutaghouamine@gmail.com
+
+# **********************************************************************************************************************************************************
+#             Python script that allow access to a Gmail mailbox in order to fetch e-mail general information as well as attachment data.
+# **********************************************************************************************************************************************************
+
 import imaplib
 import smtplib
 import email
@@ -241,10 +247,12 @@ class GmailEmail(object):
 
         print(f"E-mail sent !")
 
+    def __repr__(self):
+        return f"GmailEmail('gmail_connection', email_UID = '{self.email_UID}')"
 
 if __name__ == "__main__":
     try:
-
+    
         from gmail_credentials import NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD
 
         # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically

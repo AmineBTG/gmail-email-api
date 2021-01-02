@@ -45,7 +45,7 @@ class GmailEmail(object):
     """
     Gmail Single Email Class
     Can be instantiated from the email UID
-    Or via search "Class Method"
+    Or via from_search_result() "Class Method"
     """
     GMAIL_EMAIL_ENCODING = "(RFC822)"
 
@@ -59,9 +59,7 @@ class GmailEmail(object):
         if not self.info: raise EmailNotFound(f"Email UID {self.email_UID} CANNOT BE FOUND - Does this mail even exist ?")
         self.attachment_data = None if not self.attachment_data_all else self.attachment_data_all[0] if isinstance(self.attachment_data_all, list) else None
         self.attachment_name = None if not self.info else self.info["AttachmentName"][0] if isinstance(self.info["AttachmentName"], list) else None
-        self.attachment_name_all = None if not self.info else self.info["AttachmentName"] 
-
-        pprint(self.info)
+        self.attachment_name_all = None if not self.info else self.info["AttachmentName"]
 
     def _fetch_email_data(self):
         """
@@ -233,34 +231,60 @@ class GmailEmail(object):
             return results[0]
     
     @staticmethod
-    def send_mail(sender_name, recipient_email, subject, body_content, user_name, password):
+    def send_mail(user_name:str, #gmail account user namge
+                  password:str,
+                  sender_name:str, 
+                  recipient_email:str, 
+                  subject:str, 
+                  body_content:str, *,
+                  file_name:str =None, 
+                  file_data:bytes =None,
+                  file_main_type:str= "application", 
+                  file_sub_type:str= "csv"):
+        """
+        Quick-Send email with eventually attached files
+        Default attached file option set to send .csv files
+        password
+        - user_name:       Gmail account username
+        - sender_name:     Gmail account password
+        - recipient_email: Recipient email address
+        - subject:         Email subject
+        - body_content:    Email body, must a plain text format (not html)
+        - file_name:       Attached file name including the extension example -> "main.csv"
+        - file_data        Attached file data in bytes
+        - file_main_type   Attachment main type such as "application", "image", "audio", "text" ect...
+        - file_sub_type    Attachment sub type such as "csv", "txt", "pdf", "xlsx", "jpg", "jpeg" etc...
+        """
         msg = EmailMessage()
         msg["From"] = sender_name
         msg["To"] = recipient_email
 
-        msg["Subject"] = subject
+        msg["Subject"] = subject    
         msg.set_content(body_content)
+
+        if file_name and file_data and file_main_type and file_sub_type:
+            msg.add_attachment(file_data, maintype=file_main_type, subtype=file_sub_type, filename=file_name)
 
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
             smtp.login(user_name, password)
             smtp.send_message(msg)
 
-        print(f"E-mail sent !")
+        print(f"E-mail with subject '{subject}' sent successfully to '{recipient_email}' !")
 
     def __repr__(self):
         return f"GmailEmail('gmail_connection', email_UID = '{self.email_UID}')"
 
+
 if __name__ == "__main__":
-    try:
+
+    #for testing / debugging purposes
+    from gmail_credentials import NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD
+
+    # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
+    with GmailConnection(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD) as gmail:
+        connection = gmail.get_connection()
+        email_object = GmailEmail.from_search_result(connection, subject="décret", unseen=None)
     
-        from gmail_credentials import NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD
 
-        # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
-        with GmailConnection(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD) as gmail:
-            connection = gmail.get_connection()
-            email_object = GmailEmail.from_search_result(connection, subject="décret", unseen=None)
-
-        pprint(email_object.attachment_name)
-
-    except:
-        pass
+    GmailEmail.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Naturalisation API", "boutaghouamine@gmail.com", 
+                        "hello", "Hello Amine", file_name="décret.pdf", file_data=email_object.attachment_data, file_sub_type="pdf")

@@ -1,8 +1,8 @@
 Author: Amine BOUTAGHOU   / boutaghouamine@gmail.com
 
-**********************************************************************************************************************************************************
-            Python script that allow access to a Gmail mailbox in order to fetch e-mail general information as well as attachment data.
-**********************************************************************************************************************************************************
+*********************************************************************************************************************************
+Python script that allow access to a Gmail mailbox in order to fetch e-mail general information as well as attachment data.
+*********************************************************************************************************************************
 
 No external Python librairies needed.
 
@@ -14,7 +14,7 @@ If older python version used, discrepencies will occur with module 'typing' when
 Therefore Literal must be deleted from the code in order to get it work. Literal class are used in the import statement and in GmailEmail class (from_search_result, _search_email and _search_email_multi_criteria methods.)
 
 Script contains 4 classes :
-
+*************
 EmailNotFound  --> Exception class
 NoSearchResultsFound --> Exception class
 
@@ -47,9 +47,9 @@ GmailEmail      --> instantiate an email object
                         --> send_email():          static method we can user to send an email using smptlib
                 
                 --> Class variables: GMAIL_EMAIL_ENCODING = "(RFC822)"
-
+*************
 Best practice and get started :
-
+*************
 if __name__ == "__main__":
     # retrive Gmail account access credentials
     from gmail_credentials import GMAIL_ADDRESS, GMAIL_PASSWORD
@@ -60,3 +60,4 @@ if __name__ == "__main__":
         email_object = GmailEmail.from_search_result(connection, subject="Hello from amine", unseen=None)
 
     pprint(email_object.attachment_name)
+*************

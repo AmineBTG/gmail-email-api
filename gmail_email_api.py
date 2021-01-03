@@ -25,7 +25,8 @@ class GmailConnection(object):
     def __init__(self, user_name:str, password:str):
         self.user_name = user_name
         self.connection = imaplib.IMAP4_SSL(GmailConnection.GMAIL_HOST)
-        print(self.connection.login(self.user_name, password))
+        self._status, self._auth = self.connection.login(self.user_name, password)
+        print("*"*7,str(self._auth[0]), "*"*7)
 
     def get_connection(self):
         return self.connection
@@ -102,8 +103,8 @@ class GmailEmail(object):
         **search_agrs a series of search_field:search_expressions values such as From = 'Amine B', senton = '07-DEC-2020', subject = 'blablabla'
         searchfileds can be : [subject, body ,to, From(not from -> Python keyword), senton, sentsince, sentbefore]
         search_expression: string value of the expression that will be searched 
-        
-        
+        - example:
+        - (..., subject= "Hello Amine", senton= "07-DEC-2020", From= "Nina", unseen=True)       
         
         unseen: can take TRUE, FALSE or NONE | Default set to TRUE
         - if True: will search for UNSEEN / UNREAD emails only
@@ -115,7 +116,7 @@ class GmailEmail(object):
         if len(search_agrs) > 1:  result = GmailEmail._search_email_multi_criteria(gmail_connection, unseen = unseen, **search_agrs)
         if not search_agrs: raise NoSearchResultsFound("No search arguments passed. Try passing arguments such as subject='Hello', From='Amine' etc..")
 
-        print(f"Instantiating class instance -> GmailEmail(gmail_connection, email_UID = {result})", "\n")
+        print(f"Instantiating instance... -> GmailEmail(gmail_connection, email_UID = {result})", "\n")
         return cls(gmail_connection, result)
 
     @staticmethod
@@ -183,7 +184,7 @@ class GmailEmail(object):
         gmail_connection.literal = None
 
         if not results or results == [b'']:
-            raise NoSearchResultsFound(f"No results found for search expression: '{search_expression}', in field: '{search_field}', unseen: '{unseen}'")
+            raise NoSearchResultsFound(f"No results found for search expression: '{search_expression}', in field: '{search_field}', UNSEEN: '{unseen}'")
 
         if results: 
             results = results[0].split()  #split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]
@@ -219,7 +220,7 @@ class GmailEmail(object):
         if unseen == None: results = gmail_connection.uid('SEARCH', 'CHARSET', 'UTF-8', *search_agrs)[1]
 
         if not results or results == [b'']:
-            raise NoSearchResultsFound(f"No results found for search expressions: '{search_agrs[1::2]}', in field: '{search_agrs[::2]}', unseen: '{unseen}'")
+            raise NoSearchResultsFound(f"No results found for search expressions: '{search_agrs[1::2]}', in fields: '{search_agrs[::2]}', UNSEEN: '{unseen}'")
 
         if results: 
             results = results[0].split()  #split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]

@@ -51,8 +51,6 @@ class GmailEmail(object):
         self.email_UID = email_UID
         self.con = gmail_connection
         self.con.select("INBOX")
-        print("Available emails UIDs in 'INBOX' folder:", self.con.uid("SEARCH", None, "ALL")[1], "\n")
-
         self.info, self.attachment_data_all, self._msg = self._fetch_email_data()
         if not self.info: raise EmailNotFound(f"Email UID {self.email_UID} CANNOT BE FOUND - Does this mail even exist ?")
         self.attachment_data = None if not self.attachment_data_all else self.attachment_data_all[0] if isinstance(self.attachment_data_all, list) else None

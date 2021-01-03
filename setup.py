@@ -19,7 +19,7 @@ setup(
     #   - MAJOR VERSION 0
     #   - MINOR VERSION 1
     #   - MAINTENANCE VERSION 3
-    version='0.1.3',
+    version='0.1.4',
 
     # Here is a small description of the library. This appears
     # when someone searches for the library on https://pypi.org/search.

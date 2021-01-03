@@ -26,7 +26,7 @@ class GmailConnection(object):
         self.user_name = user_name
         self.connection = imaplib.IMAP4_SSL(GmailConnection.GMAIL_HOST)
         self._status, self._auth = self.connection.login(self.user_name, password)
-        print("*"*7,str(self._auth[0]), "*"*7)
+        print("*"*15,self._auth[0].decode("ASCII"), "*"*15)
 
     def get_connection(self):
         return self.connection
@@ -184,7 +184,7 @@ class GmailEmail(object):
         gmail_connection.literal = None
 
         if not results or results == [b'']:
-            raise NoSearchResultsFound(f"No results found for search expression: '{search_expression}', in field: '{search_field}', UNSEEN: '{unseen}'")
+            raise NoSearchResultsFound(f"No results found for search expression:'{search_expression}',  in field:'{search_field}',  UNSEEN:'{unseen}'")
 
         if results: 
             results = results[0].split()  #split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]
@@ -220,7 +220,7 @@ class GmailEmail(object):
         if unseen == None: results = gmail_connection.uid('SEARCH', 'CHARSET', 'UTF-8', *search_agrs)[1]
 
         if not results or results == [b'']:
-            raise NoSearchResultsFound(f"No results found for search expressions: '{search_agrs[1::2]}', in fields: '{search_agrs[::2]}', UNSEEN: '{unseen}'")
+            raise NoSearchResultsFound(f"No results found for search expressions:'{search_agrs[1::2]}',  in fields:'{search_agrs[::2]}',  UNSEEN:'{unseen}'")
 
         if results: 
             results = results[0].split()  #split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]

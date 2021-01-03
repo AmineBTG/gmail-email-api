@@ -114,9 +114,9 @@ class GmailEmail(object):
         """
         if len(search_agrs) == 1: result = GmailEmail._search_email(gmail_connection, unseen = unseen, **search_agrs)
         if len(search_agrs) > 1:  result = GmailEmail._search_email_multi_criteria(gmail_connection, unseen = unseen, **search_agrs)
-        if not search_agrs: raise NoSearchResultsFound("No search arguments passed. Try passing arguments such as subject='Hello', From='Amine' etc..")
+        if not search_agrs: raise NoSearchResultsFound("No search arguments passed. Try passing arguments such as subject='Hello', From='Amine BLABLA' etc..")
 
-        print(f"Instantiating instance... -> GmailEmail(gmail_connection, email_UID = {result})", "\n")
+        print(f"Instantiating instance... -> GmailEmail(gmail_connection, email_UID = {result})")
         return cls(gmail_connection, result)
 
     @staticmethod

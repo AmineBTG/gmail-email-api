@@ -67,6 +67,7 @@ class GmailEmail(object):
             msg = email.message_from_bytes(data, policy= policy.default)
             msg_attachments_name, msg_attachments_data = GmailEmail._get_email_attachments(msg) # static function call
             msg_info = {
+                "UID": self.email_UID,
                 "To": msg["To"],
                 "From": msg["From"],
                 "Subject": msg["Subject"],

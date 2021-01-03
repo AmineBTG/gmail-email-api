@@ -4,6 +4,8 @@ Author: Amine BOUTAGHOU   / boutaghouamine@gmail.com
 Python script that allow access to a Gmail mailbox in order to fetch e-mail general information as well as attachment data.
 *********************************************************************************************************************************
 
+        pip install -e git+https://github.com/AmineBTG/gmail-email-api.git#egg=gmail_email_api
+
 No external Python librairies needed.
 
 Modules used : imaplib, smtplib, email, typing and pprint 

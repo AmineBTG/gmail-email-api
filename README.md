@@ -56,18 +56,18 @@ Script contains 4 classes :
 *********************************************************************************************************************************
 Best practice and get started :
 *********************************************************************************************************************************
+        ```python
+        if __name__ == "__main__":
+                # retrive Gmail account access credentials
+                from gmail_credentials import GMAIL_ADDRESS, GMAIL_PASSWORD
 
-    if __name__ == "__main__":
-        # retrive Gmail account access credentials
-        from gmail_credentials import GMAIL_ADDRESS, GMAIL_PASSWORD
+                # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
+                with GmailConnection(GMAIL_ADDRESS, GMAIL_PASSWORD) as gmail:
+                        connection = gmail.get_connection()
+                        email_object = GmailEmail.from_search_result(connection, subject="Hello from amine", unseen=None)
 
-        # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
-        with GmailConnection(GMAIL_ADDRESS, GMAIL_PASSWORD) as gmail:
-            connection = gmail.get_connection()
-            email_object = GmailEmail.from_search_result(connection, subject="Hello from amine", unseen=None)
-
-        # send email the an attachment file
-        email_object.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Web API", "boutaghouamine@gmail.com", 
-                "hello", "Hello Amine", file_name="file.pdf", file_data=email_object.attachment_data, file_main_type="application", file_sub_type="pdf")
-        
+                # send email the an attachment file
+                email_object.send_mail(NAT_GMAIL_ADDRESS, NAT_GMAIL_PASSWORD, "Web API", "boutaghouamine@gmail.com", 
+                        "hello", "Hello Amine", file_name="file.pdf", file_data=email_object.attachment_data, file_main_type="application", file_sub_type="pdf")
+        ```
 *********************************************************************************************************************************

@@ -19,7 +19,8 @@ setup(
     #   - MAJOR VERSION 0
     #   - MINOR VERSION 1
     #   - MAINTENANCE VERSION 5
-    version='0.1.5',
+    #   - Adding Check Spam methods
+    version='0.1.6',
 
     # Here is a small description of the library. This appears
     # when someone searches for the library on https://pypi.org/search.

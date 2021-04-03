@@ -268,6 +268,19 @@ class GmailEmail(object):
             smtp.send_message(msg)
 
         print(f"E-mail with subject '{subject}' sent successfully to '{recipient_email}' !")
+    
+    @staticmethod
+    def retrive_spammed_email(gmail_connection:imaplib.IMAP4_SSL, sender_email_adress:str):
+        """
+        Move to the INBOX the eventual emails placed iligimately in the SPAM folder.
+        """
+        gmail_connection.select("[Gmail]/Spam")
+        emails = gmail_connection.uid('SEARCH', 'CHARSET', 'UTF-8', "FROM", sender_email_adress)[1]
+        
+        for email in emails[0].split():
+            connection.uid("COPY", email, "INBOX")
+
+        gmail_connection.select("INBOX")       
 
     def __repr__(self):
         return f"GmailEmail('gmail_connection', email_UID = '{self.email_UID}')"

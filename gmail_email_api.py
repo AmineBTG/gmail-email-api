@@ -6,10 +6,21 @@
 
 import email
 import imaplib
+import logging
 import smtplib
 from email import policy  # useful when returning UTF-8 text
 from email.message import EmailMessage
 from typing import Literal  # does not work with Python 3.7
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter("[%(asctime)s | %(name)s | %(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+
+logger_stream_handler = logging.StreamHandler()
+logger_stream_handler.setFormatter(formatter)
+
+logger.addHandler(logger_stream_handler)
 
 
 class EmailNotFound(Exception):

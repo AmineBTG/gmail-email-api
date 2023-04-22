@@ -42,7 +42,8 @@ class GmailConnection(object):
         self.user_name = user_name
         self.connection = imaplib.IMAP4_SSL(GmailConnection.GMAIL_HOST)
         self._status, self._auth = self.connection.login(self.user_name, password)
-        print("*" * 15, self._auth[0].decode("ASCII"), "*" * 15)
+        if self._status == "OK":
+            logger.info(f"Successfully authenticated to '{self.user_name}'")
 
     def get_connection(self):
         return self.connection
@@ -110,21 +111,22 @@ class GmailEmail(object):
             return msg_info, None if not msg_attachments_data else msg_attachments_data, msg
 
         except Exception as e:
-            print(f"Error happended when fetching email UID {self.email_UID}", e)
+            logger.warning(f"Error happended when fetching email UID {self.email_UID}")
+            logger.exception(e)
             return None, None, None
 
     def mark_as_unseen(self):
         """
         Mark the email as unseen / unread
         """
-        print(self.con.uid("STORE", self.email_UID, "-FLAGS", "\\Seen"))
+        logger.info(self.con.uid("STORE", self.email_UID, "-FLAGS", "\\Seen"))
 
     def delete_email(self):
         """
         BE CAREFULL - Cannot go back once done.
         Deleted email will have a different UID if it is put back into INBOX
         """
-        print(self.con.uid("STORE", self.email_UID, "+FLAGS", "\\Deleted"))
+        logger.info(self.con.uid("STORE", self.email_UID, "+FLAGS", "\\Deleted"))
 
     @classmethod
     def from_search_result(
@@ -154,7 +156,7 @@ class GmailEmail(object):
                 "No search arguments passed. Try passing arguments such as subject='Hello', From='Amine BLABLA' etc.."
             )
 
-        print(f"Instantiating instance... -> GmailEmail(gmail_connection, email_UID = {result})")
+        logger.info(f"Email with passed search criterias found with UID '{result.decode('ASCII')}'")
         return cls(gmail_connection, result)
 
     @staticmethod
@@ -235,9 +237,8 @@ class GmailEmail(object):
         if results:
             results = results[0].split()  # split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]
             if len(results) > 1:
-                print(f"**** BE CAREFULL, MORE THAN ONE RESULT ({len(results)}) WERE FOUND ! ****")
-            if len(results) > 1:
-                print(f"**** RESULTS FOUND: {results}. EMAIL UID RETURNED: {results[0]} ****", "\n")
+                logger.warning(f"be carefull, more than one result ({len(results)}) were found !")
+                logger.warning(f"results found: {results}. returned email uid (first result found): {results[0]}")
             return results[0]
 
     @staticmethod
@@ -284,9 +285,8 @@ class GmailEmail(object):
         if results:
             results = results[0].split()  # split the results ["1 2 3 4"] ==> ["1", "2", "3", "4"]  // ["1"] ==> ["1"]
             if len(results) > 1:
-                print(f"**** BE CAREFULL, MORE THAN ONE RESULT ({len(results)}) WERE FOUND ! ****")
-            if len(results) > 1:
-                print(f"**** RESULTS FOUND: {results}. EMAIL UID RETURNED: {results[0]} ****", "\n")
+                logger.warning(f"be carefull, more than one result ({len(results)}) were found !")
+                logger.warning(f"results found: {results}. returned email uid (first result found): {results[0]}")
             return results[0]
 
     @staticmethod
@@ -331,7 +331,7 @@ class GmailEmail(object):
             smtp.login(user_name, password)
             smtp.send_message(msg)
 
-        print(f"E-mail with subject '{subject}' sent successfully to '{recipient_email}' !")
+        logger.info(f"E-mail with subject '{subject}' sent successfully to '{recipient_email}' !")
 
     @staticmethod
     def retrieve_spammed_emails(gmail_connection: imaplib.IMAP4_SSL, sender_email_adress: str):
@@ -347,7 +347,7 @@ class GmailEmail(object):
         gmail_connection.select("INBOX")
 
         if emails[0].split():
-            print(f"{len(emails[0].split())} illegitimate emails flagged as SPAM, moved to INBOX folder.", "\n")
+            logger.info(f"{len(emails[0].split())} emails illegitimatelly flagged as SPAM, moved to INBOX folder.")
 
     def __repr__(self):
         return f"GmailEmail('gmail_connection', email_UID = '{self.email_UID}')"

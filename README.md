@@ -58,14 +58,21 @@ Best practice and get started :
 *********************************************************************************************************************************
 ```python
 if __name__ == "__main__":
-        # retrive Gmail account access credentials
-        from gmail_credentials import GMAIL_ADDRESS, GMAIL_PASSWORD
 
-        # best practice is to use the 'with context manager' so GmailConnection gets closed aumatically
-        with GmailConnection(GMAIL_ADDRESS, GMAIL_PASSWORD) as gmail:
+        # retrieve environment variables
+        username = os.environ.get("GMAIL_USER_NAME")
+        password = os.environ.get("GMAIL_PASSWORD")
+
+        with GmailConnection(username, password) as gmail:
+                # get the gmail IMAP4_SSL connection
                 connection = gmail.get_connection()
-                email_object = GmailEmail.from_search_result(gmail_connection_instance= connection, 
-                                                             subject="Hello from amine", 
-                                                             unseen=None)
+
+                # get email through search criterias
+                email_object = GmailEmail.from_search_result(
+                        gmail_connection=connection,
+                        subject="Test Email",
+                        From="boutaghouamine@gmail.com",
+                        unseen=None,
+                )
 ```
 *********************************************************************************************************************************

@@ -156,7 +156,7 @@ class GmailEmail(object):
                 "No search arguments passed. Try passing arguments such as subject='Hello', From='Amine BLABLA' etc.."
             )
 
-        logger.info(f"Email with passed search criterias found with UID '{result.decode('ASCII')}'")
+        logger.debug(f"Email with passed search criterias found with UID '{result.decode('ASCII')}'")
         return cls(gmail_connection, result)
 
     @staticmethod

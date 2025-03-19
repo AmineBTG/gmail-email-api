@@ -136,10 +136,12 @@ class GmailEmail(object):
         gmail_connection: an imaplib.IMAP4_SSL connection object "use GmailConnection class and .get_connection() methode to get it.
 
         **search_agrs a series of search_field:search_expressions values such as From = 'Amine B', senton = '07-DEC-2020', subject = 'blablabla'
-        searchfileds can be : [subject, body ,to, From(not from -> Python keyword), senton, sentsince, sentbefore]
+        searchfileds can be : [subject, body ,to, From(not from -> Python keyword), senton, sentsince, sentbefore, x_gm_raw]
         search_expression: string value of the expression that will be searched
         - example:
-        - (..., subject= "Hello Amine", senton= "07-DEC-2020", From= "Nina", unseen=True)
+        - (..., subject= "Hello Amine", senton= "07-DEC-2020", From= "Nina", unseen=True, x_gm_raw="filename:pdf")
+
+        Can use the extension X-GM-RAW: https://developers.google.com/gmail/imap/imap-extensions?hl=fr#extension_of_the_search_command_x-gm-raw
 
         unseen: can take TRUE, FALSE or NONE | Default set to TRUE
         - if True: will search for UNSEEN / UNREAD emails only
@@ -147,6 +149,11 @@ class GmailEmail(object):
         - if None: will search for regardless if SEEN/READ or not.
         returns the first email UID found from the search
         """
+
+        if "x_gm_raw" in search_agrs:
+            x_gm_raw = search_agrs.pop("search_agrs")
+            search_agrs["X-GM-RAW"] = x_gm_raw
+        
         if len(search_agrs) == 1:
             result = GmailEmail._search_email(gmail_connection, unseen=unseen, **search_agrs)
         if len(search_agrs) > 1:

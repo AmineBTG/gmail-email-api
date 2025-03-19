@@ -151,7 +151,7 @@ class GmailEmail(object):
         """
 
         if "x_gm_raw" in search_agrs:
-            x_gm_raw = search_agrs.pop("search_agrs")
+            x_gm_raw = search_agrs.pop("x_gm_raw")
             search_agrs["X-GM-RAW"] = x_gm_raw
         
         if len(search_agrs) == 1:
